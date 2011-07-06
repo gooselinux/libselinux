@@ -1,0 +1,81 @@
+diff --exclude-from=exclude -N -u -r nsalibselinux/man/man8/selinuxconlist.8 libselinux-2.0.93/man/man8/selinuxconlist.8
+--- nsalibselinux/man/man8/selinuxconlist.8	1969-12-31 19:00:00.000000000 -0500
++++ libselinux-2.0.93/man/man8/selinuxconlist.8	2010-03-16 12:33:32.000000000 -0400
+@@ -0,0 +1,18 @@
++.TH "selinuxconlist" "1" "7 May 2008" "dwalsh@redhat.com" "SELinux Command Line documentation"
++.SH "NAME"
++selinuxconlist \- list all SELinux context reachable for user
++.SH "SYNOPSIS"
++.B selinuxconlist [-l level] user [context]
++
++.SH "DESCRIPTION"
++.B selinuxconlist
++reports the list of context reachable for user from the current context or specified context
++
++.B \-l level
++mcs/mls level
++
++.SH AUTHOR	
++This manual page was written by Dan Walsh <dwalsh@redhat.com>.
++
++.SH "SEE ALSO"
++secon(8), selinuxdefcon(8)
+diff --exclude-from=exclude -N -u -r nsalibselinux/man/man8/selinuxdefcon.8 libselinux-2.0.93/man/man8/selinuxdefcon.8
+--- nsalibselinux/man/man8/selinuxdefcon.8	1969-12-31 19:00:00.000000000 -0500
++++ libselinux-2.0.93/man/man8/selinuxdefcon.8	2010-03-16 12:33:32.000000000 -0400
+@@ -0,0 +1,24 @@
++.TH "selinuxdefcon" "1" "7 May 2008" "dwalsh@redhat.com" "SELinux Command Line documentation"
++.SH "NAME"
++selinuxdefcon \- report default SELinux context for user 
++
++.SH "SYNOPSIS"
++.B selinuxdefcon [-l level] user fromcon
++
++.SH "DESCRIPTION"
++.B selinuxdefcon
++reports the default context for the specified user from the specified context
++
++.B \-l level
++mcs/mls level
++
++.SH EXAMPLE
++# selinuxdefcon jsmith system_u:system_r:sshd_t:s0
++.br
++unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
++
++.SH AUTHOR	
++This manual page was written by Dan Walsh <dwalsh@redhat.com>.
++
++.SH "SEE ALSO"
++secon(8), selinuxconlist(8)
+diff --exclude-from=exclude -N -u -r nsalibselinux/src/callbacks.c libselinux-2.0.93/src/callbacks.c
+--- nsalibselinux/src/callbacks.c	2009-04-08 09:06:23.000000000 -0400
++++ libselinux-2.0.93/src/callbacks.c	2010-03-16 12:33:32.000000000 -0400
+@@ -16,6 +16,7 @@
+ {
+ 	int rc;
+ 	va_list ap;
++	if (is_selinux_enabled() == 0) return 0;
+ 	va_start(ap, fmt);
+ 	rc = vfprintf(stderr, fmt, ap);
+ 	va_end(ap);
+diff --exclude-from=exclude -N -u -r nsalibselinux/src/matchpathcon.c libselinux-2.0.93/src/matchpathcon.c
+--- nsalibselinux/src/matchpathcon.c	2009-03-06 14:41:45.000000000 -0500
++++ libselinux-2.0.93/src/matchpathcon.c	2010-03-16 12:33:32.000000000 -0400
+@@ -2,6 +2,7 @@
+ #include <string.h>
+ #include <errno.h>
+ #include <stdio.h>
++#include <syslog.h>
+ #include "selinux_internal.h"
+ #include "label_internal.h"
+ #include "callbacks.h"
+@@ -57,7 +58,7 @@
+ {
+ 	va_list ap;
+ 	va_start(ap, fmt);
+-	vfprintf(stderr, fmt, ap);
++	vsyslog(LOG_ERR, fmt, ap);
+ 	va_end(ap);
+ }
+ 
